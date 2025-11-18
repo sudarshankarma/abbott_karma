@@ -1,0 +1,162 @@
+/* Material Design Custom Styles */
+
+/* Sidebar */
+.sidebar-fixed {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 240px;
+    background: white;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+    z-index: 998;
+    overflow-y: auto;
+}
+
+.logo-wrapper {
+    padding: 20px 15px;
+    text-align: center;
+}
+
+.logo-wrapper .brand-logo {
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.sidebar-menu {
+    margin-top: 20px;
+}
+
+.sidebar-menu li a {
+    padding: 15px 20px;
+    color: #616161;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.sidebar-menu li a:hover {
+    background: #f5f5f5;
+}
+
+.sidebar-menu li.active a {
+    background: #e3f2fd;
+    color: #1976d2;
+    border-left: 4px solid #1976d2;
+}
+
+.sidebar-menu li a i {
+    margin-right: 15px;
+}
+
+/* Main content adjustment */
+main {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+@media only screen and (max-width: 992px) {
+    .sidebar-fixed {
+        transform: translateX(-100%);
+    }
+    
+    main {
+        margin-left: 0;
+    }
+}
+
+/* Card enhancements */
+.card-panel.blue {
+    background: linear-gradient(135deg, #1976d2, #0d47a1);
+}
+
+.card-panel.orange {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+}
+
+.card-panel.green {
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+}
+
+.card-panel.red {
+    background: linear-gradient(135deg, #f44336, #c62828);
+}
+
+/* Badge enhancements */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Table enhancements */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+    color: #616161;
+}
+
+/* Button enhancements */
+.btn {
+    border-radius: 4px;
+    font-weight: 500;
+    text-transform: none;
+}
+
+/* Document actions */
+.document-actions {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.doc-btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.doc-btn.view { background: #e3f2fd; color: #1976d2; }
+.doc-btn.approve { background: #e8f5e8; color: #2e7d32; }
+.doc-btn.reject { background: #ffebee; color: #c62828; }
+
+.doc-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #1976d2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Status colors */
+.status-pending { color: #ff9800; }
+.status-approved { color: #4caf50; }
+.status-rejected { color: #f44336; }
+
+/* Material design shadows */
+.z-depth-1 {
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+}
+
+.z-depth-2 {
+    box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.3);
+}
