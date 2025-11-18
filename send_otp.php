@@ -3,111 +3,48 @@ require_once 'config.php';
 
 header('Content-Type: application/json');
 
-// SMS Configuration - Add these to your config.php
-define('SMS_API_BASE_URL', 'http://cloud.smsindiahub.in/api');
-define('SMS_USER', 'udit'); 
-define('SMS_PASSWORD', 'Associate@123'); 
-define('SMS_SENDER_ID', 'SMSHUB'); 
-define('SMS_CHANNEL', 'Trans'); 
-define('SMS_ROUTE', '##'); // Replace with your route ID if available
-define('SMS_PEID', '1701158019630577568');
+define('SMS_API_KEY', 'omUOKglyDEG8fl6lSFSE6w');
+define('SMS_SENDER_ID', 'SMSHUB');
 
-// function sendSMSWithAPIKey($phone, $message) {
-//     try {
-//         $formatted_number = '91' . $phone;
+function sendSMS($phone, $otp) {
+    try {
+        $formatted_number = '91' . $phone;
         
-//         $params = [
-//             'APIKey' => 'omUOKglyDEG8fl6lSFSE6w',
-//             'senderid' => SMS_SENDER_ID,
-//             'channel' => SMS_CHANNEL,
-//             'DCS' => 0,
-//             'flashsms' => 0,
-//             'number' => $formatted_number,
-//             'text' => urlencode($message),
-//             'route' => SMS_ROUTE,
-//             'PEId' => SMS_PEID
-//         ];
+        // Use the exact message format from your working example
+        $message = "Welcome to the Karma. Your OTP for registration is " . $otp;
         
-//         // Build the API URL
-//         $api_url = SMS_API_BASE_URL . '/mt/SendSMS?' . http_build_query($params);
+        // Build the direct URL as per your working example
+        $api_url = "https://cloud.smsindiahub.in/vendorsms/pushsms.aspx?" . 
+                   "APIKey=" . SMS_API_KEY . 
+                   "&msisdn=" . $formatted_number . 
+                   "&sid=" . SMS_SENDER_ID . 
+                   "&msg=" . urlencode($message) . 
+                   "&fl=0&gwid=2";
         
-//         // Send the request
-//         $response = file_get_contents($api_url);
+        // Directly call the URL
+        $response = file_get_contents($api_url);
         
-//         if ($response === FALSE) {
-//             error_log("SMS API request failed for phone: $phone");
-//             return false;
-//         }
+        if ($response === FALSE) {
+            error_log("SMS API request failed for phone: $phone");
+            return false;
+        }
         
-//         // Parse the response
-//         $result = json_decode($response, true);
+        // Log the full response for debugging
+        error_log("SMS API Response for $phone: " . $response);
         
-//         if (isset($result['ErrorCode']) && $result['ErrorCode'] === '000') {
-//             error_log("SMS sent successfully to $phone. JobId: " . $result['JobId']);
-//             return true;
-//         } else {
-//             $error_code = $result['ErrorCode'] ?? 'Unknown';
-//             $error_message = $result['ErrorMessage'] ?? 'Unknown error';
-//             error_log("SMS sending failed to $phone. Error: $error_code - $error_message");
-//             return false;
-//         }
-        
-//     } catch (Exception $e) {
-//         error_log("SMS sending exception for $phone: " . $e->getMessage());
-//         return false;
-//     }
-// }
-
-function sendSMS($phone, $message) {
-    $formattedNumber = '91' . $phone;
-
-    $params = [
-        'APIKey' => 'omUOKglyDEG8fl6lSFSE6w',
-        'senderid' => SMS_SENDER_ID,
-        'channel' => SMS_CHANNEL,
-        'DCS' => 0,
-        'flashsms' => 0,
-        'number' => $formattedNumber,
-        'text' => $message,
-        // 'route' => SMS_ROUTE,
-        'PEId' => SMS_PEID
-    ];
-
-    $apiUrl = SMS_API_BASE_URL . '/mt/SendSMS?' . http_build_query($params);
-
-    $ch = curl_init($apiUrl);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $response = curl_exec($ch);
-    if ($response === false) {
-        error_log('SMS API request failed: ' . curl_error($ch));
-        curl_close($ch);
-        return false;
-    }
-    curl_close($ch);
-
-    $decoded = json_decode($response, true);
-    print_r($decoded);
-    exit;
-
-    if (is_array($decoded)) {
-        $errorCode = $decoded['ErrorCode'] ?? null;
-        if ($errorCode === '000') {
+        // Check if response contains success indicator
+        if (stripos($response, 'success') !== false || stripos($response, 'sent') !== false || stripos($response, '000') !== false) {
             error_log("SMS sent successfully to $phone");
             return true;
+        } else {
+            error_log("SMS sending failed to $phone. Response: $response");
+            return false;
         }
-        $errorMessage = $decoded['ErrorMessage'] ?? 'Unknown error';
-        error_log("SMS sending failed to $phone. Error: $errorCode - $errorMessage");
+        
+    } catch (Exception $e) {
+        error_log("SMS sending exception for $phone: " . $e->getMessage());
         return false;
     }
-
-    // Fallback: treat plain string responses
-    if (stripos($response, 'success') !== false) {
-        error_log("SMS sent successfully to $phone. Response: $response");
-        return true;
-    }
-
-    error_log("SMS sending failed to $phone. Raw response: $response");
-    return false;
 }
 
 try {
@@ -145,29 +82,6 @@ try {
         // Generate new OTP
         $otp = generateOTP();
 
-        // $curl = curl_init();
-
-        // curl_setopt_array($curl, array(
-        //     CURLOPT_URL => 'https://m3nk16.api.infobip.com/sms/3/messages',
-        //     CURLOPT_RETURNTRANSFER => true,
-        //     CURLOPT_ENCODING => '',
-        //     CURLOPT_MAXREDIRS => 10,
-        //     CURLOPT_TIMEOUT => 0,
-        //     CURLOPT_FOLLOWLOCATION => true,
-        //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        //     CURLOPT_CUSTOMREQUEST => 'POST',
-        //     CURLOPT_POSTFIELDS =>'{"messages":[{"sender":"InfoSMS","destinations":[{"to":"918898106409"}],"content":{"text":"'.$otp.'"}}]}',
-        //     CURLOPT_HTTPHEADER => array(
-        //         'Authorization: {authorization}',
-        //         'Content-Type: application/json',
-        //         'Accept: application/json'
-        //     ),
-        // ));
-
-        // $response = curl_exec($curl);
-
-        // curl_close($curl);
-        // echo $response;
         // Store OTP in database
         if (!storeOTP($phone, $otp, 'sms')) {
             throw new Exception("Failed to generate OTP");
@@ -176,8 +90,7 @@ try {
     }
 
     // Send SMS with the OTP
-    $message = $otp;
-    if (!sendSMS($phone, $message)) {
+    if (!sendSMS($phone, $otp)) {
         throw new Exception("Failed to send SMS");
     }
 
@@ -188,8 +101,7 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'OTP sent successfully',
-        'phone' => $phone,
-        'otp' => $otp // For testing purposes, remove in production
+        'phone' => $phone
     ]);
 
 } catch (Exception $e) {
