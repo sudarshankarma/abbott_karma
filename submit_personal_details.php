@@ -2,6 +2,13 @@
 require_once 'config.php';
 
 header('Content-Type: application/json');
+function generateNewApplicationId($fullName, $phone) {
+    $userName = strtolower(str_replace(' ', '', $fullName));
+    $last5 = substr($phone, -5);
+    $random4 = str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+
+    return "abbott-" . $userName . "-" . $last5 . "-" . $random4;
+}
 
 try {
     // Check if phone is verified
@@ -49,7 +56,8 @@ try {
                 WHERE application_id = :application_id";
     } else {
         // Create new application
-        $applicationId = generateApplicationId();
+       // $applicationId = generateApplicationId();
+        $applicationId = generateNewApplicationId($_POST['fullName'], $phone);
         $sql = "INSERT INTO applications (
                 application_id, full_name, email, phone, whatsapp, 
                 piramal_uan, abbott_uan, piramal_id, abbott_id, 

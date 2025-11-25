@@ -57,5 +57,32 @@ $sidebarRoleDisplay = htmlspecialchars($sidebarRoleLabel, ENT_QUOTES, 'UTF-8');
             </a>
         </li>
         <?php endif; ?>
+        <!-- Add this to your sidebar.php -->
+        <?php /*<li>
+            <a href="?controller=support" class="waves-effect">
+                <i class="material-icons">support_agent</i>
+                Support Tickets
+                <?php
+                // Show unread count badge
+                $supportModel = new SupportModel($this->db);
+                $unreadCount = $supportModel->getUnreadCount();
+                if ($unreadCount > 0): ?>
+                    <span class="new badge red" data-badge-caption=""><?php echo $unreadCount; ?></span>
+                <?php endif; ?>
+            </a>
+        </li> */ ?>
+        <li class="<?php echo ($_GET['controller'] ?? '') == 'support' ? 'active' : ''; ?>">
+            <a href="?controller=support" class="waves-effect">
+                <i class="material-icons">support_agent</i>
+                Support Tickets
+                <?php
+                // Show unread count badge
+                $supportModel = new SupportModel($this->db);
+                $unreadCount = $supportModel->getUnreadCount();
+                if ($unreadCount > 0): ?>
+                    <span class="new badge red" data-badge-caption=""><?php echo $unreadCount; ?></span>
+                <?php endif; ?>
+            </a>
+        </li>
     </ul>
 </div>

@@ -597,7 +597,7 @@ if ($applicationData) {
                     </div>
 
                     <!-- Step 3: Completion -->
-                    <div class="step-content <?php echo $currentStep == 3 ? 'active' : ''; ?>" id="step3">
+                   <?php /* <div class="step-content <?php echo $currentStep == 3 ? 'active' : ''; ?>" id="step3">
                         <div class="text-center py-5">
                             <div class="mb-4">
                                 <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
@@ -620,7 +620,35 @@ if ($applicationData) {
                                 </a>
                             </div>
                         </div>
+                    </div> */ ?>
+
+                    <!-- Step 3: Completion -->
+                    <!-- Step 3: Completion -->
+                    <div class="step-content <?php echo $currentStep == 3 ? 'active' : ''; ?>" id="step3">
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                            </div>
+                            <h3 class="text-success mb-3">Application Submitted Successfully!</h3>
+                            <p class="text-muted mb-4">Your employee registration application has been submitted successfully.</p>
+                            
+                            <div class="alert alert-info">
+                                <strong>Application ID:</strong> <span id="applicationIdDisplay"><?php echo htmlspecialchars($applicationData['application_id'] ?? 'EPF-2024-0000'); ?></span><br>
+                                <strong>Status:</strong> Under Review<br>
+                                <strong>Expected Processing Time:</strong> 2-3 business days
+                            </div>
+
+                            <div class="mt-4">
+                                <a href="dashboard.php" class="btn btn-primary me-2">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Go to Dashboard
+                                </a>
+                                <button class="btn btn-outline-primary" onclick="downloadReceipt()">
+                                    <i class="fas fa-download me-1"></i>Download Receipt
+                                </button>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>

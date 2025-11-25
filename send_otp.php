@@ -3,7 +3,8 @@ require_once 'config.php';
 
 header('Content-Type: application/json');
 
-define('SMS_API_KEY', 'omUOKglyDEG8fl6lSFSE6w');
+// define('SMS_API_KEY', 'omUOKglyDEG8fl6lSFSE6w');
+define('SMS_API_KEY', 'f1af4eb84ee84103bb7ea19cb9459ccf');
 define('SMS_SENDER_ID', 'SMSHUB');
 
 function sendSMS($phone, $otp) {
@@ -11,7 +12,8 @@ function sendSMS($phone, $otp) {
         $formatted_number = '91' . $phone;
         
         // Use the exact message format from your working example
-        $message = "Welcome to the Karma. Your OTP for registration is " . $otp;
+        $message = "Welcome to the Karma powered by SMSINDIAHUB. Your OTP for registration is " . $otp;
+    
         
         // Build the direct URL as per your working example
         $api_url = "https://cloud.smsindiahub.in/vendorsms/pushsms.aspx?" . 
@@ -45,6 +47,71 @@ function sendSMS($phone, $otp) {
         error_log("SMS sending exception for $phone: " . $e->getMessage());
         return false;
     }
+}
+
+function sendWhatsappMessage($to, $messageText)
+{
+    $apiUrl = "https://rcspro.in/v23.0/786573974548789/messages";
+    $token  = "4dfb629e-63c3-4706-8af6-007646a25e1a";
+    $url = "";
+    // Build payload
+    $payload =[
+            "messaging_product" => "whatsapp",
+            "recipient_type" => "individual",
+            "to" => "91$to",
+            "type" => "template",
+
+            "template" => [
+                "name" => "verify_code_1",
+                "language" => [
+                    "code" => "en"
+                ],
+                "components" => [
+                    [
+                        "type" => "body",
+                        "parameters" => [
+                            [
+                                "type" => "text",
+                                "text" => "$messageText"
+                            ]
+                        ]
+                    ],
+                    [
+                        "type" => "button",
+                        "parameters" => [
+                            [
+                                "type" => "text",
+                                "text" => "{{url}}"
+                            ]
+                        ],
+                        "sub_type" => "url",
+                        "index" => "0"
+                    ]
+                ]
+            ],
+
+            "biz_opaque_callback_data" => "{{BizOpaqueCallbackData}}"
+        ];
+
+    // Init Curl
+    $ch = curl_init($apiUrl);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer {$token}",
+        "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    // Execute
+    $response = curl_exec($ch);
+    $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return [
+        "status"   => $status,
+        "response" => $response
+    ];
 }
 
 try {
@@ -93,6 +160,14 @@ try {
     if (!sendSMS($phone, $otp)) {
         throw new Exception("Failed to send SMS");
     }
+
+    if (!sendWhatsappMessage($phone,$otp)) {
+        throw new Exception("Failed to send Whatsapp message");
+    }
+    // $result = sendWhatsappMessage($phone,$otp);
+
+    // error_log("Status: " . $result["status"] . "\n");
+    // error_log("Response: " . $result["response"] . "\n");
 
 
     // Store phone in session for verification

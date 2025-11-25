@@ -34,7 +34,8 @@ class AuthController extends BaseController {
             }
         }
         
-        $this->render('auth/login', ['error' => $error]);
+        // $this->render('auth/login', ['error' => $error]);
+        $this->render('auth/login', ['error' => $error], false);
     }
 
     public function logout() {

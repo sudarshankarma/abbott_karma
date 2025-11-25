@@ -29,18 +29,38 @@ class BaseController {
         return true;
     }
     
-    protected function render($view, $data = []) {
-        extract($data);
+    // protected function render($view, $data = []) {
+    //     extract($data);
         
-        // Check if view exists
+    //     // Check if view exists
+    //     $view_file = "views/{$view}.php";
+    //     if (!file_exists($view_file)) {
+    //         throw new Exception("View not found: {$view}");
+    //     }
+        
+    //     require_once 'views/layouts/header.php';
+    //     require_once $view_file;
+    //     require_once 'views/layouts/footer.php';
+    // }
+
+    // Base_controller.php modification for Full Page Layouts
+    protected function render($view, $data = [], $use_layout = true) {
+        extract($data);
         $view_file = "views/{$view}.php";
+        
         if (!file_exists($view_file)) {
             throw new Exception("View not found: {$view}");
         }
         
-        require_once 'views/layouts/header.php';
+        if ($use_layout) {
+            require_once 'views/layouts/header.php';
+        }
+        
         require_once $view_file;
-        require_once 'views/layouts/footer.php';
+        
+        if ($use_layout) {
+            require_once 'views/layouts/footer.php';
+        }
     }
     
     protected function redirect($controller, $action = 'index', $params = '') {

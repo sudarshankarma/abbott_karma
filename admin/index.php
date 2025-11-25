@@ -14,7 +14,8 @@ $routes = [
     'applications' => 'ApplicationsController',
     'documents' => 'DocumentsController',
     'users' => 'UsersController',
-    'activity' => 'ActivityController'
+    'activity' => 'ActivityController',
+    'support' => 'SupportController'
 ];
 
 // Check if controller exists

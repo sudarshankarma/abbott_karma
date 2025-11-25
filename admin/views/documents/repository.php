@@ -114,7 +114,7 @@
                 <!-- Documents Table -->
                 <div class="row">
                     <div class="col s12">
-                        <table class="striped highlight responsive-table">
+                        <table id="documentsTable" class="table table-bordered table-striped table-hover">
                             <thead>
                                 <tr>
                                     <th>Application ID</th>
@@ -175,6 +175,12 @@
                                                data-tooltip="View Application">
                                                 <i class="material-icons">open_in_new</i>
                                             </a>
+                                            <button class="btn-small green waves-effect waves-light tooltipped"
+                                                    data-tooltip="Chat about this document"
+                                                    onclick="openDocumentChat('<?php echo $document['application_id']; ?>', '<?php echo $document['type']; ?>_card')">
+                                                <i class="material-icons">chat</i>
+                                            </button>
+                                            <!-- <a href="admin/index.php?controller=support&action=document&params[]=<?= (int)$document['id'] ?>" class="btn btn-sm btn-secondary">Chat</a> -->
                                         </div>
                                     </td>
                                 </tr>
@@ -361,5 +367,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const tooltips = document.querySelectorAll('.tooltipped');
     M.Tooltip.init(tooltips);
+});
+function openDocumentChat(appId, docType) {
+    // Convert document type to match your database (pan -> pan_card, aadhar -> aadhar_card, etc.)
+    const documentTypeMap = {
+        'pan': 'pan_card',
+        'aadhar': 'aadhar_card', 
+        'cheque': 'cancelled_cheque'
+    };
+    
+    const mappedDocType = documentTypeMap[docType] || docType;
+    window.location.href = `?controller=support&action=documentChat&app_id=${appId}&doc_type=${mappedDocType}`;
+}
+document.addEventListener('DOMContentLoaded', function() {
+    let table = new DataTable('#documentsTable');
 });
 </script>

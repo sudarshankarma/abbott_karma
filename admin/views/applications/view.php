@@ -153,7 +153,11 @@
                                                 onclick="previewDocument('<?php echo $application['application_id']; ?>', '<?php echo addslashes($application['full_name']); ?>', 'pan', '<?php echo $application['pan_card']; ?>', '<?php echo $application['pan_status']; ?>', '<?php echo date('M j, Y', strtotime($application['created_at'])); ?>')">
                                             <i class="material-icons">visibility</i>
                                         </button> -->
-
+                                      <button class="btn-small green waves-effect waves-light tooltipped" 
+                                                data-tooltip="Chat about this document"
+                                                onclick="openDocumentChat('<?php echo $application['application_id']; ?>', 'pan_card')">
+                                            <i class="material-icons">chat</i>
+                                        </button>
                                         <button class="btn-small blue waves-effect waves-light tooltipped" 
                                             data-tooltip="Preview Document" 
                                             onclick="previewDocument('<?php echo $application['application_id']; ?>', '<?php echo addslashes($application['full_name']); ?>', 'pan', '<?php echo $application['pan_card']; ?>', '<?php echo $application['pan_status']; ?>', '<?php echo date('M j, Y', strtotime($application['created_at'])); ?>')">
@@ -174,6 +178,11 @@
                                         <p class="grey-text">Aadhar: <?php echo htmlspecialchars($application['aadhar_number']); ?></p>
                                     </div>
                                     <div class="col s4 right-align">
+                                        <button class="btn-small green waves-effect waves-light tooltipped" 
+                                                data-tooltip="Chat" 
+                                                onclick="openDocumentChat('<?php echo $application['application_id']; ?>', 'aadhar')">
+                                            <i class="material-icons">chat</i>
+                                        </button>
                                         <button class="btn-small blue waves-effect waves-light"
                                                 onclick="previewDocument('<?php echo $application['application_id']; ?>', '<?php echo addslashes($application['full_name']); ?>', 'aadhar', '<?php echo $application['aadhar_card']; ?>', '<?php echo $application['aadhar_status']; ?>', '<?php echo date('M j, Y', strtotime($application['created_at'])); ?>')">
                                             <i class="material-icons">visibility</i>
@@ -193,6 +202,11 @@
                                         <p class="grey-text">Bank verification document</p>
                                     </div>
                                     <div class="col s4 right-align">
+                                        <button class="btn-small green waves-effect waves-light tooltipped" 
+                                                data-tooltip="Chat" 
+                                                onclick="openDocumentChat('<?php echo $application['application_id']; ?>', 'cheque')">
+                                            <i class="material-icons">chat</i>
+                                        </button>
                                         <button class="btn-small blue waves-effect waves-light"
                                                 onclick="previewDocument('<?php echo $application['application_id']; ?>', '<?php echo addslashes($application['full_name']); ?>', 'cheque', '<?php echo $application['cancelled_cheque']; ?>', '<?php echo $application['cheque_status']; ?>', '<?php echo date('M j, Y', strtotime($application['created_at'])); ?>')">
                                             <i class="material-icons">visibility</i>
@@ -412,7 +426,9 @@ function updateDocumentStatus(appId, docType, status) {
         }
     });
 }
-
+function openDocumentChat(appId, docType) {
+    window.location.href = `?controller=support&action=documentChat&app_id=${appId}&doc_type=${docType}_card`;
+}
 // Initialize tooltips
 document.addEventListener('DOMContentLoaded', function() {
     const tooltips = document.querySelectorAll('.tooltipped');

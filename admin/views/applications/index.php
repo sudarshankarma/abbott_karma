@@ -106,7 +106,8 @@
                 <!-- Applications Table -->
                 <div class="row">
                     <div class="col s12">
-                        <table class="striped highlight responsive-table">
+                        <!-- <table class="striped highlight responsive-table"> -->
+                        <table id="applicationsTable" class="table table-bordered table-striped table-hover">
                             <thead>
                                 <tr>
                                     <th>Application ID</th>
@@ -452,4 +453,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const tooltips = document.querySelectorAll('.tooltipped');
     M.Tooltip.init(tooltips);
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    let table = new DataTable('#applicationsTable');
+});
+
+
 </script>

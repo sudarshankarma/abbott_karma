@@ -231,9 +231,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consent'])) {
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="fas fa-play-circle me-2"></i>Start Registration
                     </button>
-                    <a href="verify_phone.php" class="btn btn-outline-secondary">
+                    <!-- <a href="verify_phone.php" class="btn btn-outline-secondary">
                         <i class="fas fa-history me-2"></i>Continue Existing Application
-                    </a>
+                    </a> -->
                 </div>
             </form>
 

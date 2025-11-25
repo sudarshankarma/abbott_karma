@@ -7,7 +7,7 @@ class AdminApp {
     }
 
     init() {
-        this.initializeComponents();
+       // this.initializeComponents();
         this.setupEventListeners();
         this.startSessionTimer();
     }
@@ -92,6 +92,29 @@ class AdminApp {
         
         // Initialize any other custom components
         this.initializeDocumentPreview();
+    }
+
+    initializeDocumentPreview() {
+        console.log('Initializing document preview...');
+        
+        // Document preview modal functionality
+        const previewButtons = document.querySelectorAll('.document-preview-btn');
+        previewButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const documentUrl = button.getAttribute('data-document-url');
+                const documentName = button.getAttribute('data-document-name');
+                this.openDocumentPreview(documentUrl, documentName);
+            });
+        });
+
+        // Close preview modal
+        const closePreview = document.getElementById('closePreview');
+        if (closePreview) {
+            closePreview.addEventListener('click', () => {
+                this.closeDocumentPreview();
+            });
+        }
     }
 
     setupEventListeners() {
@@ -305,13 +328,13 @@ class AdminApp {
         const loading = document.getElementById('documentLoading');
         const image = document.getElementById('documentImage');
         const error = document.getElementById('documentError');
-         const fullFilePath = `../uploads/${appId}/${filePath}`;
+        //const fullFilePath = `../uploads/${appId}/${filePath}`;
 
         img.onload = () => {
             if (loading) loading.style.display = 'none';
             if (image) {
                 image.style.display = 'block';
-                image.src = fullFilePath;
+                image.src = filePath;
             }
         };
 
@@ -320,7 +343,7 @@ class AdminApp {
             if (error) error.style.display = 'block';
         };
 
-        img.src = fullFilePath;
+        img.src = filePath;
     }
 
     showDocumentError() {

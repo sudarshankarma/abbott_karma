@@ -151,6 +151,11 @@ try {
         $stmt->execute($params);
     }
 
+    // Update admin status to under_review
+    $statusSql = "UPDATE applications SET admin_status = 'under_review', updated_at = NOW() WHERE application_id = ?";
+    $statusStmt = $pdo->prepare($statusSql);
+    $statusStmt->execute([$applicationId]);
+
     echo json_encode([
         'success' => true,
         'message' => 'Documents processed successfully',
