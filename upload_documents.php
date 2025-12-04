@@ -153,6 +153,7 @@ if (!$applicationId) {
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <!-- Logo Header -->
+                 <link rel="shortcut icon" href="images/abbott_favicon.ico" type="image/x-icon"/>
                 <div class="logo-header">
                     <div class="logo-container logo-left">
                         <div class="logo-placeholder" style="background-image: url('images/karma_logo.png');"></div>

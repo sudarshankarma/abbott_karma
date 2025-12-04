@@ -113,6 +113,7 @@ $success = $_GET['success'] ?? '';
             <!-- Logo Header -->
             <div class="logo-header">
                 <div class="logo-container">
+                    <link rel="shortcut icon" href="images/abbott_favicon.ico" type="image/x-icon"/>
                     <div class="logo-placeholder" style="background-image: url('images/karma_logo.png');"></div>
                     <div class="logo-placeholder" style="background-image: url('images/Abbott_Laboratories_logo.png');"></div>
                 </div>

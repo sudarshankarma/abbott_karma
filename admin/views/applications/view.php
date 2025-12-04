@@ -175,7 +175,7 @@
                                         <span class="badge <?php echo $application['aadhar_status'] === 'approved' ? 'green' : ($application['aadhar_status'] === 'rejected' ? 'red' : 'orange'); ?> white-text">
                                             <?php echo ucfirst($application['aadhar_status']); ?>
                                         </span>
-                                        <p class="grey-text">Aadhar: <?php echo htmlspecialchars($application['aadhar_number']); ?></p>
+                                        <p class="grey-text">Aadhar: <?php echo htmlspecialchars($application['aadhar_number'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                     </div>
                                     <div class="col s4 right-align">
                                         <button class="btn-small green waves-effect waves-light tooltipped" 

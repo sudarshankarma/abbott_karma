@@ -89,11 +89,12 @@
     <!-- Main Header -->
     <header class="main-header">
         <div class="container">
-            <div class="logo-container">
+            <link rel="shortcut icon" href="images/abbott_favicon.ico" type="image/x-icon"/>
+             <div class="logo-container">
                 <div class="logo-left">
                     <div class="logo-placeholder" style="background-image: url('images/karma_logo.png');"></div>
                 </div>
-                
+
                 <div class="app-title">
                     <h1>Employee UAN Onboarding Portal</h1>
                     <p>Piramal & Abbott Employee Registration System</p>
@@ -105,3 +106,4 @@
             </div>
         </div>
     </header>
+    

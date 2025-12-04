@@ -25,28 +25,19 @@ try {
     error_log("Error fetching application data: " . $e->getMessage());
 }
 
-// Determine current step - UPDATED LOGIC for partial uploads
+// Determine current step
 $currentStep = 1;
 if ($applicationData) {
-    // If personal details are completed, go to step 2
     if ($applicationData['status'] === 'personal_details_completed' || 
         $applicationData['status'] === 'documents_uploaded' ||
         $applicationData['status'] === 'completed') {
         $currentStep = 2;
     }
     
-    // Only go to step 3 if application is marked as completed in database
-    if ($applicationData['status'] === 'completed') {
+    // Only go to step 3 if ALL documents are uploaded
+    if ($applicationData['pan_card'] && $applicationData['aadhar_card'] && $applicationData['cancelled_cheque']) {
         $currentStep = 3;
     }
-}
-
-// Count uploaded documents for display
-$uploadedCount = 0;
-if ($applicationData) {
-    if (!empty($applicationData['pan_card'])) $uploadedCount++;
-    if (!empty($applicationData['aadhar_card'])) $uploadedCount++;
-    if (!empty($applicationData['cancelled_cheque'])) $uploadedCount++;
 }
 ?>
 <!DOCTYPE html>
@@ -76,7 +67,6 @@ if ($applicationData) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: relative;
         }
 
         .logo-container {
@@ -98,14 +88,8 @@ if ($applicationData) {
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
+            /*border: 1px solid #ddd;*/
             background-color: #ffffff;
-        }
-
-        .logout-container {
-            position: absolute;
-            right: 20px;
-            top: 20px;
-            z-index: 100;
         }
 
         .progress-container {
@@ -258,11 +242,6 @@ if ($applicationData) {
             background: #f0f9f0;
         }
 
-        .document-upload-card.pending {
-            border-color: #ffc107;
-            background: #fffcf5;
-        }
-
         .file-preview {
             margin-top: 10px;
             padding: 10px;
@@ -279,128 +258,14 @@ if ($applicationData) {
             font-size: 0.8rem;
             margin-left: 10px;
         }
-
-        .pending-badge {
-            background: #ffc107;
-            color: #000;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-left: 10px;
-        }
-
-        .progress-alert {
-            background: linear-gradient(135deg, #f7931e, #f26b35);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .upload-progress {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-
-        .progress-text {
-            margin-left: 15px;
-        }
-
-        .progress-number {
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .progress-desc {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .file-update-note {
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-
-        .btn-logout {
-            background: transparent;
-            border: 1px solid #dc3545;
-            color: #dc3545;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .btn-logout:hover {
-            background: #dc3545;
-            color: white;
-        }
-
-        /* Document Viewer Modal Styles */
-        .modal-xl {
-            max-width: 90%;
-        }
-
-        #documentFrame {
-            width: 100%;
-            height: 600px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        #documentImage {
-            max-width: 100%;
-            max-height: 70vh;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        #unsupportedViewer {
-            padding: 40px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        #unsupportedViewer i {
-            color: #6c757d;
-            margin-bottom: 20px;
-        }
-
-        /* Loading indicator for document viewer */
-        .loading-indicator {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-        }
-
-        .loading-indicator .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
     <div class="container mt-4">
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <!-- Logo Header with Logout Button -->
-                <link rel="shortcut icon" href="images/abbott_favicon.ico" type="image/x-icon"/>
+                <!-- Logo Header -->
+                 <link rel="shortcut icon" href="images/abbott_favicon.ico" type="image/x-icon"/>
                 <div class="logo-header">
                     <div class="logo-container logo-left">
                         <div class="logo-placeholder" style="background-image: url('images/karma_logo.png');"></div>
@@ -415,35 +280,15 @@ if ($applicationData) {
                     <i class="fas fa-check-circle me-2"></i>
                     <strong>Phone Verified:</strong> +91 <?php echo htmlspecialchars($verifiedPhone); ?>
                     <span class="verified-badge"><i class="fas fa-shield-alt me-1"></i>Verified</span>
-                    <div class="logout-container">
-                        <a href="logout.php" class="btn-logout">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
-                        </a>
-                    </div>
                 </div>
 
                 <!-- Resume Notice -->
                 <?php if ($applicationData): ?>
                 <div class="resume-notice">
                     <h5><i class="fas fa-sync-alt me-2"></i>Resuming Application</h5>
-                    <p class="mb-2">Welcome back! We found your existing application. Please complete the remaining steps.</p>
+                    <p class="mb-0">Welcome back! We found your existing application. Please complete the remaining steps.</p>
+                    <?php if ($applicationData['application_id']): ?>
                     <small><strong>Application ID:</strong> <?php echo htmlspecialchars($applicationData['application_id']); ?></small>
-                    
-                    <?php if ($currentStep == 2): ?>
-                    <div class="upload-progress mt-3">
-                        <div class="progress" style="height: 20px; width: 150px;">
-                            <div class="progress-bar bg-success" role="progressbar" 
-                                 style="width: <?php echo ($uploadedCount / 3) * 100; ?>%;" 
-                                 aria-valuenow="<?php echo $uploadedCount; ?>" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="3">
-                            </div>
-                        </div>
-                        <div class="progress-text">
-                            <div class="progress-number"><?php echo $uploadedCount; ?> of 3 documents uploaded</div>
-                            <div class="progress-desc"><?php echo 3 - $uploadedCount; ?> remaining</div>
-                        </div>
-                    </div>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>
@@ -626,57 +471,23 @@ if ($applicationData) {
 
                     <!-- Step 2: Documents Upload -->
                     <div class="step-content <?php echo $currentStep == 2 ? 'active' : ''; ?>" id="step2">
-                        <h4 class="text-primary mb-4">
-                            <i class="fas fa-file-upload me-2"></i>Step 2: Document Upload
-                            <?php if ($uploadedCount > 0): ?>
-                            <span class="badge bg-success float-end"><?php echo $uploadedCount; ?>/3 Uploaded</span>
-                            <?php endif; ?>
-                        </h4>
-                        
-                        <div class="progress-alert mb-4">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-info-circle fa-2x me-3"></i>
-                                <div>
-                                    <strong>Upload Progress:</strong> <?php echo $uploadedCount; ?> of 3 documents uploaded
-                                    <div class="small">You can upload/re-upload documents until the application is completed. All documents must be uploaded for final submission.</div>
-                                </div>
-                            </div>
-                        </div>
+                        <h4 class="text-primary mb-4">Step 2: Document Upload</h4>
                         
                         <form id="documentsForm" novalidate>
                             <input type="hidden" name="application_id" id="applicationId" value="<?php echo htmlspecialchars($applicationData['application_id'] ?? ''); ?>">
-                            <input type="hidden" id="currentStep" value="<?php echo $currentStep; ?>">
                             
                             <div class="form-section">
                                 <div class="section-title">Required Documents</div>
-                                <p class="text-muted mb-4">Please upload clear copies. You can upload now or come back later. Maximum file size: 10MB per file.</p>
+                                <p class="text-muted mb-4">Please upload clear copies. Maximum file size: 10MB per file.</p>
                                 
                                 <!-- PAN Card -->
-                                <div class="document-upload-card <?php echo !empty($applicationData['pan_card']) ? 'has-file' : 'pending'; ?>" id="panCardSection">
+                                <div class="document-upload-card" id="panCardSection">
                                     <div class="row align-items-start">
                                         <div class="col-md-12">
-                                            <div class="document-title d-flex justify-content-between align-items-center mb-3">
-                                                <div>
-                                                    <i class="fas fa-id-card me-2"></i>PAN Card
-                                                    <?php if (!empty($applicationData['pan_card'])): ?>
-                                                    <span class="verified-badge">
-                                                        <i class="fas fa-check me-1"></i>Uploaded
-                                                    </span>
-                                                    <?php else: ?>
-                                                    <span class="pending-badge">
-                                                        <i class="fas fa-clock me-1"></i>Pending
-                                                    </span>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <?php if (!empty($applicationData['pan_card'])): ?>
-                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="showDocument('pan_card')">
-                                                    <i class="fas fa-eye me-1"></i>View
-                                                </button>
-                                                <?php endif; ?>
-                                            </div>
+                                            <div class="document-title">PAN Card</div>
                                             
                                             <div class="mb-3">
-                                                <label class="form-label <?php echo empty($applicationData['pan_number']) ? 'required-field' : ''; ?>">PAN Card Number</label>
+                                                <label class="form-label required-field">PAN Card Number</label>
                                                 <input 
                                                     type="text" 
                                                     class="form-control" 
@@ -684,7 +495,7 @@ if ($applicationData) {
                                                     name="panNumber" 
                                                     maxlength="10"
                                                     placeholder="ABCDE1234F"
-                                                    <?php echo empty($applicationData['pan_number']) ? 'required' : ''; ?>
+                                                    required
                                                     style="text-transform: uppercase;"
                                                     value="<?php echo htmlspecialchars($applicationData['pan_number'] ?? ''); ?>">
                                                 <small class="text-muted">Format: 5 letters, 4 digits, 1 letter (e.g., ABCDE1234F)</small>
@@ -692,28 +503,17 @@ if ($applicationData) {
                                             </div>
                                             
                                             <div>
-                                                <label class="form-label <?php echo empty($applicationData['pan_card']) ? 'required-field' : ''; ?>">
-                                                    <?php echo !empty($applicationData['pan_card']) ? 'Update PAN Card' : 'Upload PAN Card'; ?>
-                                                </label>
+                                                <label class="form-label required-field">Upload PAN Card</label>
                                                 <input 
                                                     type="file" 
                                                     class="form-control" 
                                                     id="panCard" 
                                                     name="panCard" 
                                                     accept=".pdf,.jpg,.jpeg,.png"
-                                                    <?php echo empty($applicationData['pan_card']) ? 'required' : ''; ?>
+                                                    required
                                                     onchange="validateFile(this, 'panCardSection')">
                                                 <small class="file-info">PDF, JPG, PNG (Max 10MB)</small>
-                                                <?php if (!empty($applicationData['pan_card'])): ?>
-                                                <div id="panCardPreview" class="file-preview">
-                                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                                    <strong>Already uploaded</strong>
-                                                    <small class="text-muted ms-2">(<?php echo htmlspecialchars($applicationData['pan_card']); ?>)</small>
-                                                    <div class="file-update-note">You can upload a new file to replace this one.</div>
-                                                </div>
-                                                <?php else: ?>
                                                 <div id="panCardPreview" class="file-preview" style="display:none;"></div>
-                                                <?php endif; ?>
                                                 <div class="invalid-feedback">Please upload PAN Card document</div>
                                             </div>
                                         </div>
@@ -721,31 +521,13 @@ if ($applicationData) {
                                 </div>
 
                                 <!-- Aadhar Card -->
-                                <div class="document-upload-card <?php echo !empty($applicationData['aadhar_card']) ? 'has-file' : 'pending'; ?>" id="aadharCardSection">
+                                <div class="document-upload-card" id="aadharCardSection">
                                     <div class="row align-items-start">
                                         <div class="col-md-12">
-                                            <div class="document-title d-flex justify-content-between align-items-center mb-3">
-                                                <div>
-                                                    <i class="fas fa-address-card me-2"></i>Aadhar Card
-                                                    <?php if (!empty($applicationData['aadhar_card'])): ?>
-                                                    <span class="verified-badge">
-                                                        <i class="fas fa-check me-1"></i>Uploaded
-                                                    </span>
-                                                    <?php else: ?>
-                                                    <span class="pending-badge">
-                                                        <i class="fas fa-clock me-1"></i>Pending
-                                                    </span>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <?php if (!empty($applicationData['aadhar_card'])): ?>
-                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="showDocument('aadhar_card')">
-                                                    <i class="fas fa-eye me-1"></i>View
-                                                </button>
-                                                <?php endif; ?>
-                                            </div>
+                                            <div class="document-title">Aadhar Card</div>
                                             
                                             <div class="mb-3">
-                                                <label class="form-label <?php echo empty($applicationData['aadhar_number']) ? 'required-field' : ''; ?>">Aadhar Card Number</label>
+                                                <label class="form-label required-field">Aadhar Card Number</label>
                                                 <input 
                                                     type="text" 
                                                     class="form-control" 
@@ -753,35 +535,24 @@ if ($applicationData) {
                                                     name="aadharNumber" 
                                                     maxlength="12"
                                                     placeholder="123456789012"
-                                                    <?php echo empty($applicationData['aadhar_number']) ? 'required' : ''; ?>
+                                                    required
                                                     value="<?php echo htmlspecialchars($applicationData['aadhar_number'] ?? ''); ?>">
                                                 <small class="text-muted">Enter 12-digit Aadhar number</small>
                                                 <div class="invalid-feedback">Please enter a valid 12-digit Aadhar number</div>
                                             </div>
                                             
                                             <div>
-                                                <label class="form-label <?php echo empty($applicationData['aadhar_card']) ? 'required-field' : ''; ?>">
-                                                    <?php echo !empty($applicationData['aadhar_card']) ? 'Update Aadhar Card' : 'Upload Aadhar Card'; ?>
-                                                </label>
+                                                <label class="form-label required-field">Upload Aadhar Card</label>
                                                 <input 
                                                     type="file" 
                                                     class="form-control" 
                                                     id="aadharCard" 
                                                     name="aadharCard" 
                                                     accept=".pdf,.jpg,.jpeg,.png"
-                                                    <?php echo empty($applicationData['aadhar_card']) ? 'required' : ''; ?>
+                                                    required
                                                     onchange="validateFile(this, 'aadharCardSection')">
                                                 <small class="file-info">PDF, JPG, PNG (Max 10MB)</small>
-                                                <?php if (!empty($applicationData['aadhar_card'])): ?>
-                                                <div id="aadharCardPreview" class="file-preview">
-                                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                                    <strong>Already uploaded</strong>
-                                                    <small class="text-muted ms-2">(<?php echo htmlspecialchars($applicationData['aadhar_card']); ?>)</small>
-                                                    <div class="file-update-note">You can upload a new file to replace this one.</div>
-                                                </div>
-                                                <?php else: ?>
                                                 <div id="aadharCardPreview" class="file-preview" style="display:none;"></div>
-                                                <?php endif; ?>
                                                 <div class="invalid-feedback">Please upload Aadhar Card document</div>
                                             </div>
                                         </div>
@@ -789,52 +560,23 @@ if ($applicationData) {
                                 </div>
 
                                 <!-- Cancelled Cheque -->
-                                <div class="document-upload-card <?php echo !empty($applicationData['cancelled_cheque']) ? 'has-file' : 'pending'; ?>" id="cancelledChequeSection">
+                                <div class="document-upload-card" id="cancelledChequeSection">
                                     <div class="row align-items-start">
                                         <div class="col-md-12">
-                                            <div class="document-title d-flex justify-content-between align-items-center mb-3">
-                                                <div>
-                                                    <i class="fas fa-money-check-alt me-2"></i>Cancelled Cheque
-                                                    <?php if (!empty($applicationData['cancelled_cheque'])): ?>
-                                                    <span class="verified-badge">
-                                                        <i class="fas fa-check me-1"></i>Uploaded
-                                                    </span>
-                                                    <?php else: ?>
-                                                    <span class="pending-badge">
-                                                        <i class="fas fa-clock me-1"></i>Pending
-                                                    </span>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <?php if (!empty($applicationData['cancelled_cheque'])): ?>
-                                                <button type="button" class="btn btn-sm btn-outline-success" onclick="showDocument('cancelled_cheque')">
-                                                    <i class="fas fa-eye me-1"></i>View
-                                                </button>
-                                                <?php endif; ?>
-                                            </div>
+                                            <div class="document-title">Cancelled Cheque</div>
                                             
                                             <div>
-                                                <label class="form-label <?php echo empty($applicationData['cancelled_cheque']) ? 'required-field' : ''; ?>">
-                                                    <?php echo !empty($applicationData['cancelled_cheque']) ? 'Update Cancelled Cheque' : 'Upload Cancelled Cheque'; ?>
-                                                </label>
+                                                <label class="form-label required-field">Upload Cancelled Cheque</label>
                                                 <input 
                                                     type="file" 
                                                     class="form-control" 
                                                     id="cancelledCheque" 
                                                     name="cancelledCheque" 
                                                     accept=".pdf,.jpg,.jpeg,.png"
-                                                    <?php echo empty($applicationData['cancelled_cheque']) ? 'required' : ''; ?>
+                                                    required
                                                     onchange="validateFile(this, 'cancelledChequeSection')">
                                                 <small class="file-info">Upload cancelled cheque for bank verification - PDF, JPG, PNG (Max 10MB)</small>
-                                                <?php if (!empty($applicationData['cancelled_cheque'])): ?>
-                                                <div id="cancelledChequePreview" class="file-preview">
-                                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                                    <strong>Already uploaded</strong>
-                                                    <small class="text-muted ms-2">(<?php echo htmlspecialchars($applicationData['cancelled_cheque']); ?>)</small>
-                                                    <div class="file-update-note">You can upload a new file to replace this one.</div>
-                                                </div>
-                                                <?php else: ?>
                                                 <div id="cancelledChequePreview" class="file-preview" style="display:none;"></div>
-                                                <?php endif; ?>
                                                 <div class="invalid-feedback">Please upload Cancelled Cheque</div>
                                             </div>
                                         </div>
@@ -846,24 +588,42 @@ if ($applicationData) {
                                 <button type="button" class="btn btn-outline-secondary" onclick="previousStep()">
                                     <i class="fas fa-arrow-left me-1"></i> Previous
                                 </button>
-                                <div>
-                                    <button type="button" class="btn btn-outline-success me-2" onclick="saveDocumentsProgress()" id="saveProgressBtn">
-                                        <i class="fas fa-save me-1"></i> Save Progress
-                                    </button>
-                                    <?php if ($uploadedCount < 3): ?>
-                                    <button type="button" class="btn btn-primary" onclick="checkForCompletion()" id="checkCompleteBtn">
-                                        <i class="fas fa-check me-1"></i> Check for Completion
-                                    </button>
-                                    <?php else: ?>
-                                    <button type="button" class="btn btn-primary" onclick="submitAllDocuments()" id="completeBtn">
-                                        <i class="fas fa-paper-plane me-1"></i> Submit Application
-                                    </button>
-                                    <?php endif; ?>
-                                </div>
+                                <button type="submit" class="btn btn-primary" id="step2SubmitBtn">
+                                    <span id="submitBtnText">Complete Application</span> 
+                                    <i class="fas fa-check ms-1" id="submitIcon"></i>
+                                    <span class="spinner-border spinner-border-sm ms-1" role="status" id="submitSpinner" style="display:none;"></span>
+                                </button>
                             </div>
                         </form>
                     </div>
 
+                    <!-- Step 3: Completion -->
+                   <?php /* <div class="step-content <?php echo $currentStep == 3 ? 'active' : ''; ?>" id="step3">
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                            </div>
+                            <h3 class="text-success mb-3">Application Completed Successfully!</h3>
+                            <p class="text-muted mb-4">Your employee registration application has been submitted successfully.</p>
+                            
+                            <div class="alert alert-info">
+                                <strong>Application ID:</strong> <span id="applicationIdDisplay"><?php echo htmlspecialchars($applicationData['application_id'] ?? 'EPF-2024-0000'); ?></span><br>
+                                <strong>Status:</strong> Under Review<br>
+                                <strong>Expected Processing Time:</strong> 2-3 business days
+                            </div>
+
+                            <div class="mt-4">
+                                <button class="btn btn-primary me-2" onclick="downloadReceipt()">
+                                    <i class="fas fa-download me-1"></i>Download Receipt
+                                </button>
+                                <a href="index.php" class="btn btn-outline-primary">
+                                    <i class="fas fa-home me-1"></i>Back to Home
+                                </a>
+                            </div>
+                        </div>
+                    </div> */ ?>
+
+                    <!-- Step 3: Completion -->
                     <!-- Step 3: Completion -->
                     <div class="step-content <?php echo $currentStep == 3 ? 'active' : ''; ?>" id="step3">
                         <div class="text-center py-5">
@@ -889,59 +649,12 @@ if ($applicationData) {
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Document Viewer Modal -->
-    <div class="modal fade" id="documentModal" tabindex="-1" aria-labelledby="documentModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="documentModalLabel">Document Viewer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="documentViewer">
-                        <!-- Loading Indicator -->
-                        <div id="loadingIndicator" class="loading-indicator" style="display:none;">
-                            <div class="spinner"></div>
-                            <p>Loading document...</p>
-                        </div>
-                        
-                        <!-- PDF Viewer -->
-                        <div id="pdfViewer" style="display:none;">
-                            <iframe id="pdfFrame" width="100%" height="600" frameborder="0"></iframe>
-                        </div>
-                        
-                        <!-- Image Viewer -->
-                        <div id="imageViewer" style="display:none; text-align: center;">
-                            <img id="documentImage" src="" alt="Document" style="max-width: 100%; max-height: 600px;">
-                        </div>
-                        
-                        <!-- Unsupported Format Message -->
-                        <div id="unsupportedViewer" style="display:none; text-align: center; padding: 50px;">
-                            <i class="fas fa-file-alt fa-3x mb-3"></i>
-                            <h5>Document Preview Not Available</h5>
-                            <p>This document format cannot be previewed. Please download the file to view it.</p>
-                            <a href="#" id="downloadLink" class="btn btn-primary">
-                                <i class="fas fa-download me-2"></i>Download Document
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <a href="#" id="directDownloadLink" class="btn btn-outline-primary">
-                        <i class="fas fa-download me-1"></i>Download
-                    </a>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentStep = <?php echo $currentStep; ?>;
@@ -1044,7 +757,6 @@ if ($applicationData) {
             
             // Add success styling to card
             if (sectionId) {
-                document.getElementById(sectionId).classList.remove('pending');
                 document.getElementById(sectionId).classList.add('has-file');
             }
             
@@ -1151,7 +863,7 @@ if ($applicationData) {
             }
         }
 
-        async function saveDocumentsProgress() {
+        async function submitDocuments() {
             const applicationId = document.getElementById('applicationId').value || sessionStorage.getItem('applicationId');
             if (!applicationId) {
                 alert('Application ID not found. Please start over.');
@@ -1160,11 +872,10 @@ if ($applicationData) {
 
             const formDataToSend = new FormData();
             formDataToSend.append('application_id', applicationId);
-            formDataToSend.append('save_progress', 'true');
             
-            // Only append if values exist and are not empty
-            const panNumber = document.getElementById('panNumber').value.trim();
-            const aadharNumber = document.getElementById('aadharNumber').value.trim();
+            // Only append if values exist
+            const panNumber = document.getElementById('panNumber').value;
+            const aadharNumber = document.getElementById('aadharNumber').value;
             
             if (panNumber) {
                 formDataToSend.append('pan_number', panNumber);
@@ -1191,131 +902,15 @@ if ($applicationData) {
                 formDataToSend.append('cancelled_cheque', cancelledChequeFile);
             }
             
-            const saveBtn = document.getElementById('saveProgressBtn');
-            const originalText = saveBtn.innerHTML;
+            const submitBtn = document.getElementById('step2SubmitBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const submitIcon = document.getElementById('submitIcon');
+            const submitSpinner = document.getElementById('submitSpinner');
             
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
-            
-            try {
-                const response = await fetch('submit_documents.php', {
-                    method: 'POST',
-                    body: formDataToSend
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    alert('Progress saved successfully! You can continue uploading remaining documents later.');
-                    location.reload(); // Reload to update the UI with new uploaded files
-                } else {
-                    throw new Error(result.message || 'Failed to save progress');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while saving progress: ' + error.message);
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = originalText;
-            }
-        }
-
-        async function submitAllDocuments() {
-            const applicationId = document.getElementById('applicationId').value || sessionStorage.getItem('applicationId');
-            if (!applicationId) {
-                alert('Application ID not found. Please start over.');
-                return;
-            }
-
-            const formDataToSend = new FormData();
-            formDataToSend.append('application_id', applicationId);
-            formDataToSend.append('complete_application', 'true');
-            
-            // Validate all required fields
-            const panNumber = document.getElementById('panNumber').value.trim();
-            const aadharNumber = document.getElementById('aadharNumber').value.trim();
-            
-            if (!panNumber) {
-                alert('PAN number is required for final submission');
-                document.getElementById('panNumber').focus();
-                return;
-            }
-            
-            if (!aadharNumber) {
-                alert('Aadhar number is required for final submission');
-                document.getElementById('aadharNumber').focus();
-                return;
-            }
-            
-            // Validate PAN format
-            const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-            if (!panRegex.test(panNumber)) {
-                alert('Please enter a valid PAN number (format: ABCDE1234F)');
-                document.getElementById('panNumber').focus();
-                return;
-            }
-            
-            // Validate Aadhar format
-            const aadharRegex = /^[0-9]{12}$/;
-            if (!aadharRegex.test(aadharNumber)) {
-                alert('Please enter a valid 12-digit Aadhar number');
-                document.getElementById('aadharNumber').focus();
-                return;
-            }
-            
-            formDataToSend.append('pan_number', panNumber);
-            formDataToSend.append('aadhar_number', aadharNumber);
-            
-            // Check if we have all three documents (either already uploaded or being uploaded now)
-            const hasPanCard = <?php echo !empty($applicationData['pan_card']) ? 'true' : 'false'; ?>;
-            const hasAadharCard = <?php echo !empty($applicationData['aadhar_card']) ? 'true' : 'false'; ?>;
-            const hasCancelledCheque = <?php echo !empty($applicationData['cancelled_cheque']) ? 'true' : 'false'; ?>;
-            
-            const panCardFile = document.getElementById('panCard').files[0];
-            const aadharCardFile = document.getElementById('aadharCard').files[0];
-            const cancelledChequeFile = document.getElementById('cancelledCheque').files[0];
-            
-            // Determine final state
-            const finalPanCard = hasPanCard || panCardFile;
-            const finalAadharCard = hasAadharCard || aadharCardFile;
-            const finalCancelledCheque = hasCancelledCheque || cancelledChequeFile;
-            
-            if (!finalPanCard) {
-                alert('PAN Card is required for final submission');
-                document.getElementById('panCard').focus();
-                return;
-            }
-            
-            if (!finalAadharCard) {
-                alert('Aadhar Card is required for final submission');
-                document.getElementById('aadharCard').focus();
-                return;
-            }
-            
-            if (!finalCancelledCheque) {
-                alert('Cancelled Cheque is required for final submission');
-                document.getElementById('cancelledCheque').focus();
-                return;
-            }
-            
-            // Append files if they exist
-            if (panCardFile) {
-                formDataToSend.append('pan_card', panCardFile);
-            }
-            
-            if (aadharCardFile) {
-                formDataToSend.append('aadhar_card', aadharCardFile);
-            }
-            
-            if (cancelledChequeFile) {
-                formDataToSend.append('cancelled_cheque', cancelledChequeFile);
-            }
-            
-            const completeBtn = document.getElementById('completeBtn');
-            const originalText = completeBtn.innerHTML;
-            
-            completeBtn.disabled = true;
-            completeBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
+            submitBtn.disabled = true;
+            submitBtnText.textContent = 'Submitting...';
+            submitIcon.style.display = 'none';
+            submitSpinner.style.display = 'inline-block';
             
             try {
                 const response = await fetch('submit_documents.php', {
@@ -1326,144 +921,43 @@ if ($applicationData) {
                 const result = await response.json();
                 
                 if (result.success) {
+                    // Show success message and update UI
+                    alert('Documents submitted successfully! You can upload remaining documents later.');
+                    
                     // Update application status display
                     document.getElementById('applicationIdDisplay').textContent = applicationId;
+                    
+                    // Show which documents were uploaded
+                    if (result.documents_uploaded) {
+                        let uploadedDocs = [];
+                        if (result.documents_uploaded.pan_card) uploadedDocs.push('PAN Card');
+                        if (result.documents_uploaded.aadhar_card) uploadedDocs.push('Aadhar Card');
+                        if (result.documents_uploaded.cancelled_cheque) uploadedDocs.push('Cancelled Cheque');
+                        
+                        if (uploadedDocs.length > 0) {
+                            alert('Successfully uploaded: ' + uploadedDocs.join(', '));
+                        }
+                    }
                     
                     sessionStorage.removeItem('applicationId');
                     nextStep();
                 } else {
-                    throw new Error(result.message || 'Failed to submit application');
+                    throw new Error(result.message || 'Failed to submit documents');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while submitting application: ' + error.message);
+                alert('An error occurred while submitting documents: ' + error.message);
             } finally {
-                completeBtn.disabled = false;
-                completeBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                submitBtnText.textContent = 'Save Documents';
+                submitIcon.style.display = 'inline';
+                submitSpinner.style.display = 'none';
             }
         }
 
-        function checkForCompletion() {
-            const panNumber = document.getElementById('panNumber').value.trim();
-            const aadharNumber = document.getElementById('aadharNumber').value.trim();
-            
-            const hasPanCard = <?php echo !empty($applicationData['pan_card']) ? 'true' : 'false'; ?>;
-            const hasAadharCard = <?php echo !empty($applicationData['aadhar_card']) ? 'true' : 'false'; ?>;
-            const hasCancelledCheque = <?php echo !empty($applicationData['cancelled_cheque']) ? 'true' : 'false'; ?>;
-            
-            const panCardFile = document.getElementById('panCard').files[0];
-            const aadharCardFile = document.getElementById('aadharCard').files[0];
-            const cancelledChequeFile = document.getElementById('cancelledCheque').files[0];
-            
-            // Check what's missing
-            let missingItems = [];
-            
-            if (!panNumber && !hasPanCard && !panCardFile) {
-                missingItems.push('PAN Card and PAN Number');
-            } else if (!panNumber && (hasPanCard || panCardFile)) {
-                missingItems.push('PAN Number');
-            } else if (panNumber && !hasPanCard && !panCardFile) {
-                missingItems.push('PAN Card file');
-            }
-            
-            if (!aadharNumber && !hasAadharCard && !aadharCardFile) {
-                missingItems.push('Aadhar Card and Aadhar Number');
-            } else if (!aadharNumber && (hasAadharCard || aadharCardFile)) {
-                missingItems.push('Aadhar Number');
-            } else if (aadharNumber && !hasAadharCard && !aadharCardFile) {
-                missingItems.push('Aadhar Card file');
-            }
-            
-            if (!hasCancelledCheque && !cancelledChequeFile) {
-                missingItems.push('Cancelled Cheque');
-            }
-            
-            if (missingItems.length === 0) {
-                // All documents are ready, show submit button
-                document.getElementById('checkCompleteBtn').style.display = 'none';
-                document.getElementById('completeBtn').style.display = 'inline-block';
-                alert('All documents are ready for submission! Click "Submit Application" to complete your application.');
-            } else {
-                alert('The following items are still required:\n\n• ' + missingItems.join('\n• ') + '\n\nPlease upload the missing documents and try again.');
-            }
-        }
-
-        function showDocument(docType) {
-            const applicationId = document.getElementById('applicationId').value;
-            if (!applicationId) {
-                alert('Application ID not found');
-                return;
-            }
-            
-            // Show loading state
-            const modal = new bootstrap.Modal(document.getElementById('documentModal'));
-            document.getElementById('documentModalLabel').textContent = docType.replace('_', ' ') + ' - Preview';
-            
-            // Hide all viewers and show loading
-            document.getElementById('pdfViewer').style.display = 'none';
-            document.getElementById('imageViewer').style.display = 'none';
-            document.getElementById('unsupportedViewer').style.display = 'none';
-            document.getElementById('loadingIndicator').style.display = 'flex';
-            
-            // Show modal immediately with loading indicator
-            modal.show();
-            
-            // Fetch document info
-            fetchDocumentInfo(applicationId, docType, modal);
-        }
-
-        async function fetchDocumentInfo(applicationId, docType, modal) {
-            try {
-                const response = await fetch('get_document_info.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `application_id=${applicationId}&doc_type=${docType}`
-                });
-                
-                const result = await response.json();
-                
-                // Hide loading indicator
-                document.getElementById('loadingIndicator').style.display = 'none';
-                
-                if (result.success && result.file_path) {
-                    // Set up download links
-                    const downloadUrl = 'download_document.php?file=' + encodeURIComponent(result.file_path) + '&type=' + docType;
-                    document.getElementById('downloadLink').href = downloadUrl;
-                    document.getElementById('directDownloadLink').href = downloadUrl;
-                    
-                    // Display document based on type
-                    const fileExtension = result.file_path.split('.').pop().toLowerCase();
-                    const fileName = result.file_path.split('/').pop();
-                    
-                    if (fileExtension === 'pdf') {
-                        // Display PDF
-                        document.getElementById('pdfFrame').src = downloadUrl + '&preview=1';
-                        document.getElementById('pdfViewer').style.display = 'block';
-                    } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(fileExtension)) {
-                        // Display Image
-                        document.getElementById('documentImage').src = downloadUrl + '&preview=1';
-                        document.getElementById('imageViewer').style.display = 'block';
-                    } else {
-                        // Unsupported format
-                        document.getElementById('unsupportedViewer').style.display = 'block';
-                        document.getElementById('downloadLink').textContent = 'Download ' + fileName;
-                    }
-                } else {
-                    alert('Document not found: ' + (result.message || 'Unable to load document'));
-                    modal.hide();
-                }
-            } catch (error) {
-                console.error('Error fetching document:', error);
-                document.getElementById('loadingIndicator').style.display = 'none';
-                alert('Error loading document. Please try again.');
-                modal.hide();
-            }
-        }
         function downloadReceipt() {
             const appId = document.getElementById('applicationIdDisplay').textContent;
-            const fullName = document.getElementById('fullName').value || '<?php echo $applicationData["full_name"] ?? ""; ?>';
+            const fullName = document.getElementById('fullName').value;
             
             const receiptHTML = `
                 <!DOCTYPE html>
@@ -1490,7 +984,6 @@ if ($applicationData) {
                     
                     <div class="status-box">
                         <strong>Application ID:</strong> ${appId}<br>
-                        <strong>Applicant Name:</strong> ${fullName}<br>
                         <strong>Status:</strong> Under Review<br>
                         <strong>Submission Date:</strong> ${new Date().toLocaleString('en-IN')}<br>
                         <strong>Expected Processing Time:</strong> 2-3 business days
@@ -1508,6 +1001,64 @@ if ($applicationData) {
             printWindow.document.close();
             printWindow.print();
         }
+
+        document.getElementById('documentsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            let isValid = true;
+            let errorMessages = [];
+            
+            // Validate that if a file is uploaded, the corresponding number is provided
+            const panCard = document.getElementById('panCard');
+            const panNumber = document.getElementById('panNumber');
+            
+            if (panCard.files.length > 0) {
+                const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+                if (!panNumber.value || !panRegex.test(panNumber.value)) {
+                    panNumber.classList.add('is-invalid');
+                    isValid = false;
+                    errorMessages.push('Please enter a valid PAN number (format: ABCDE1234F)');
+                } else {
+                    panNumber.classList.remove('is-invalid');
+                }
+            }
+            
+            const aadharCard = document.getElementById('aadharCard');
+            const aadharNumber = document.getElementById('aadharNumber');
+            
+            if (aadharCard.files.length > 0) {
+                const aadharRegex = /^[0-9]{12}$/;
+                if (!aadharNumber.value || !aadharRegex.test(aadharNumber.value)) {
+                    aadharNumber.classList.add('is-invalid');
+                    isValid = false;
+                    errorMessages.push('Please enter a valid 12-digit Aadhar number');
+                } else {
+                    aadharNumber.classList.remove('is-invalid');
+                }
+            }
+            
+            // Check if at least one document is being uploaded
+            const panCardFile = document.getElementById('panCard').files[0];
+            const aadharCardFile = document.getElementById('aadharCard').files[0];
+            const cancelledChequeFile = document.getElementById('cancelledCheque').files[0];
+            
+            if (!panCardFile && !aadharCardFile && !cancelledChequeFile) {
+                if (confirm('No documents selected. Do you want to submit without uploading any documents? You can upload them later.')) {
+                    isValid = true; // Allow submission with no documents
+                } else {
+                    isValid = false;
+                }
+            }
+            
+            if (!isValid) {
+                if (errorMessages.length > 0) {
+                    alert('Please fix the following errors:\n\n' + errorMessages.join('\n'));
+                }
+                return;
+            }
+            
+            await submitDocuments();
+        });
     </script>
 </body>
 </html>

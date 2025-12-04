@@ -247,7 +247,7 @@
 <body>
 
 <div class="split-screen">
-    
+    <link rel="shortcut icon" href="../images/abbott_favicon.ico" type="image/x-icon"/>
     <div class="left-panel">
         <img src="../images/karma_logo.png" alt="Karma Logo" class="karma-logo">
         <img src="../images/Abbott_Laboratories_logo.png" alt="Abbott Logo" class="abbott-logo">

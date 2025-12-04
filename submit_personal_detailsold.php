@@ -39,7 +39,7 @@ try {
     $existingApp = $checkStmt->fetch();
 
     if ($existingApp) {
-        // Update existing application - FIXED PARAMETER ISSUE
+        // Update existing application
         $applicationId = $existingApp['application_id'];
         $sql = "UPDATE applications SET 
                 full_name = :full_name,
@@ -53,10 +53,10 @@ try {
                 phone_verified = :phone_verified,
                 status = 'personal_details_completed',
                 updated_at = NOW()
-                WHERE application_id = :application_id 
-                AND phone = :phone";
+                WHERE application_id = :application_id";
     } else {
         // Create new application
+       // $applicationId = generateApplicationId();
         $applicationId = generateNewApplicationId($_POST['fullName'], $phone);
         $sql = "INSERT INTO applications (
                 application_id, full_name, email, phone, whatsapp, 
@@ -85,10 +85,8 @@ try {
     ];
 
     if ($existingApp) {
-        // For UPDATE, add application_id to params
         $params[':application_id'] = $applicationId;
     } else {
-        // For INSERT, add application_id to params
         $params[':application_id'] = $applicationId;
     }
 

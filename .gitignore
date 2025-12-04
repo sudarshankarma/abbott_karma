@@ -3,3 +3,4 @@ admin/config/
 admin/logs/
 db_backup/
 logs/
+tables/

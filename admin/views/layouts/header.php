@@ -78,7 +78,7 @@
     <!-- DataTables Bootstrap 5 CSS (Updated version) -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
 
-
+    
     <!-- Materialize CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     
@@ -90,6 +90,7 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/custom.css">
+    <link rel="shortcut icon" href="../images/abbott_favicon.ico" type="image/x-icon"/>
 </head>
 <body class="grey lighten-4">
     <?php if (isset($_SESSION['user_id'])): ?>
